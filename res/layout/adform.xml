@@ -62,6 +62,7 @@
             android:textSize="18sp"    
             android:gravity="left"    
             android:layout_span="6"
+            android:layout_marginRight="10dip"
             />   
     </TableRow>  
 <TableRow    
@@ -89,6 +90,7 @@
             android:textSize="18sp"    
             android:gravity="left"    
             android:layout_span="6"
+            android:layout_marginRight="10dip"
             />     
     </TableRow>     
 <TableRow    
@@ -116,6 +118,7 @@
             android:textSize="18sp"    
             android:gravity="left"    
             android:layout_span="6"
+            android:layout_marginRight="10dip"
             />    
     </TableRow>    
      <TableRow    
@@ -138,6 +141,7 @@
             android:layout_width="match_parent"    
             android:layout_height="wrap_content"  
              android:layout_span="6"  
+             android:layout_marginRight="10dip"
             />    
     </TableRow> 
 <TableRow    
@@ -166,6 +170,7 @@
             android:textSize="18sp"    
             android:gravity="left" 
             android:layout_span="6"   
+            android:layout_marginRight="10dip"
             />    
     </TableRow>
     <TableRow    
@@ -193,6 +198,7 @@
             android:textSize="18sp"    
             android:gravity="left"    
             android:layout_span="6"
+            android:layout_marginRight="10dip"
             />    
     </TableRow>   
     
@@ -221,7 +227,7 @@
             android:text="@string/adpic"
             android:gravity="center"    
             android:layout_span="6"
-          
+            android:layout_marginRight="10dip"
           
           />    
       </TableRow>  

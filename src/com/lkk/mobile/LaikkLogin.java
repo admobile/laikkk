@@ -2,8 +2,18 @@ package com.lkk.mobile;
 
 import java.io.File;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import java.util.HashMap;
+import java.util.Map;
+
+
+import com.lkk.mobile.tools.NetUtil;
+
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,14 +21,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.SumPathEffect;
-import android.text.Editable;
+
+import android.graphics.drawable.Drawable;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 public class LaikkLogin extends Activity {
@@ -26,6 +38,9 @@ public class LaikkLogin extends Activity {
 	EditText username_View;
 	EditText password_View;
 	Button  submit_button;
+	String username;
+	String password;
+	String user_state;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,16 +50,27 @@ public class LaikkLogin extends Activity {
 		  password_View =(EditText)findViewById(R.id.password);
 		  submit_button =(Button)findViewById(R.id.submit);
 		
+		   username = username_View.getText().toString();
+		  password = password_View.getText().toString();
+			
 		  submit_button.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 		       
-				//多线程访问 网络，得到数据库中的 username，password
-				String username = username_View.getText().toString();
-				String password = password_View.getText().toString();
-				//调用usernamepassword方法
+				//多线程访问 网络	
+				 URL url = null;
+				try {
+					url = new URL("");
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}  //网络URL
+				 new checkUserTask().execute(url);    //启动线程
+				        
+				
+				
 				if(username.equals("admin")&& password.equals("admin")){
 					Intent intent = new Intent();  
                     //验证通过，启动下一个acticity
@@ -163,5 +189,48 @@ public class LaikkLogin extends Activity {
 		return result;
 	}
     
+   // 网络访问线程
+private class checkUserTask extends AsyncTask<URL, Integer, String> {
+	    
+		
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			Log.e("M2", "begin");
+			super.onPreExecute();
+		}
+
+		protected String doInBackground(URL... urls) {
+			Log.e("M22", "begin");
+         
+             
+		
+				
+				 Map<String, String> checkUser = new HashMap<String, String>();
+				           checkUser.put("username", username);
+				           checkUser.put("password", password);
+				   String status = NetUtil.getStringByPost(urls[0].toString(), checkUser);
+              
+          
+            
+            
+	         return status;
+	     }
+
+	
+		 @Override
+			protected void onProgressUpdate(Integer... values) {
+				// TODO Auto-generated method stub
+				super.onProgressUpdate(values);
+				
+			}
+
+			protected void onPostExecute(String result) {
+				Log.e("M222", "begin");
+		     
+			     user_state = result;
+			}
+	
+}
 
 }
