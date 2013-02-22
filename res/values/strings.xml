@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">来看看手机端程序</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="loginname">用户名</string>
+    <string name="password">密码</string>
+    <string name="login">登陆界面</string>
+    <string name="ad_top">发布新广告</string>
+    <string name="adtitle">广告标题</string>
+    <string name="addesc">广告简介</string>
+    <string name="adbody">广告内容</string>
+    <string name="adpromote">是否促销</string>
+    <string name="adpromoteprice">促销价格</string>
+    <string name="adprice">原价格</string>
+    <string name="adpic">广告图片</string>
+    <string name="submit">提交</string>
+     <string name="loading">载入 </string>
+</resources>
