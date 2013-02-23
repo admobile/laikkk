@@ -45,13 +45,12 @@ public class LaikkLogin extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_laikkmain);
-		//checkPhoneStage();   //  SD  NetWork
+		  checkPhoneStage();   //  SD  NetWork
 		  username_View =(EditText)findViewById(R.id.username);
 		  password_View =(EditText)findViewById(R.id.password);
 		  submit_button =(Button)findViewById(R.id.submit);
 		
-		   username = username_View.getText().toString();
-		  password = password_View.getText().toString();
+		  
 			
 		  submit_button.setOnClickListener(new OnClickListener() {
 			
@@ -60,7 +59,7 @@ public class LaikkLogin extends Activity {
 				// TODO Auto-generated method stub
 		       
 				//多线程访问 网络	
-				 URL url = null;
+			/*	 URL url = null;
 				try {
 					url = new URL("");
 				} catch (MalformedURLException e) {
@@ -68,9 +67,10 @@ public class LaikkLogin extends Activity {
 					e.printStackTrace();
 				}  //网络URL
 				 new checkUserTask().execute(url);    //启动线程
-				        
-				
-				
+				*/        
+				username = username_View.getText().toString();   
+				password = password_View.getText().toString();
+				Log.e(username, password);
 				if(username.equals("admin")&& password.equals("admin")){
 					Intent intent = new Intent();  
                     //验证通过，启动下一个acticity
@@ -115,12 +115,8 @@ public class LaikkLogin extends Activity {
 		 */
 		if (existSDcard()) { // 判断手机SD卡是否存在
 			if (new File("/sdcard").canRead()) {
-				File file = new File("sdcard/fatalityUpload");
+				File file = new File("sdcard/Pic/upLoad/");
 				if (!file.exists()) {
-					file.mkdir();
-					file = new File("sdcard/fatalityUpload/Thumbnail_fatality");
-					file.mkdir();
-					file = new File("sdcard/fatalityUpload/fatality");
 					file.mkdir();
 				}
 			}

@@ -249,7 +249,7 @@
       <ImageView
            android:id="@+id/Pic_show"    
             android:layout_width="match_parent"    
-            android:layout_height="wrap_content"    
+            android:layout_height="50dip"    
             android:textStyle="bold"    
             android:typeface="serif"    
             android:textSize="18sp" 

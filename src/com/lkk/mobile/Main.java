@@ -1,21 +1,44 @@
 package com.lkk.mobile;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.lkk.mobile.tools.NetUtil;
+
 
 
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Picture;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +48,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +66,8 @@ public class Main extends Activity {
 	 EditText e_price ;
 	 Button   b_file ;
 	 Button  submit;
+	 ImageView image_show;
+	 
 	 //变量
 	 String title ;
 	 String contentShort ; 	
@@ -50,11 +76,16 @@ public class Main extends Activity {
 	 String pricePro;
 	 String price;
 	  //图片功能 consts
-	 private static final File PHOTO_DIR = new File(
-				Environment.getExternalStorageDirectory() + "/DCIM/Camera");
-	 private static final int PIC_REQUEST_CODE_WITH_DATA = 1; // 获取图片数据
-		private static final int PIC_REQUEST_CODE_SELECT_CAMERA = 2; // 标识请求照相功能的activity
-		private static final int PIC_Select_CODE_ImageFromLoacal = 3;// 标识请求相册取图功能的activity
+	 
+	 private String fileName;         // 图片名称
+	 File photo_file = null;          //图片文件
+	 ProgressDialog delLoadingDialog = null;   //进度条···
+	 private Uri imageFilePath;   //照片路径	
+	 private Date today;	
+	 private byte[] image_Content;	
+	 private Bitmap myBitmap;
+	 
+	  String add_statues = null ;
 	 @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,25 +98,41 @@ public class Main extends Activity {
 		 e_price = (EditText)findViewById(R.id.textView6_2_price);       //原价格
 		 b_file =  (Button)findViewById(R.id.button_file);               // 上传图片
 	     submit = (Button) findViewById(R.id.buttom_submit);
-		
-	     //处理spinner
+		 image_show = (ImageView) findViewById(R.id.Pic_show);
+	  
+		 //处理spinner
 		adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,m);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		s_promotion.setAdapter(adapter);
         s_promotion.setOnItemSelectedListener(new SpinnerSelectedListener());
 		s_promotion.setVisibility(View.VISIBLE);
 		 
-		    title = e_title.getText().toString();
-		    contentShort = e_contentShort.getText().toString();
-		    content = e_content.getText().toString();
-		    pricePro = e_pricePro.getText().toString();
-		    price = e_price.getText().toString();
+		    
 		 
 		 
            submit.setOnClickListener(new OnClickListener() {
+        	   
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
+				title = e_title.getText().toString();
+			    contentShort = e_contentShort.getText().toString();
+			    content = e_content.getText().toString();
+			    pricePro = e_pricePro.getText().toString();
+			    price = e_price.getText().toString();
+			   
+			   // Log.e("ADD", title+content+content+price+pricePro+photo_file.toString());
+			       //还差一个图片路径
+			    //多线程 提交广告
+				/* URL url = null;
+					try {
+						url = new URL("");
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}  //网络URL
+					 new PostAdTask().execute(url);    //启动线程
+				      */
 				
 			}
 		});
@@ -104,32 +151,41 @@ public class Main extends Activity {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
+								Intent getImageByCamera=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+								ContentValues values = new ContentValues(1);
+								values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg"); 
+								imageFilePath = Main.this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+								Log.e("imagePath",imageFilePath.toString());
+								getImageByCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageFilePath); //这样就将文件的存储方式和uri指定到了Camera应用中 
+								//修改这个地址
+								Log.e("Start1", "start1`````````````");
+								startActivityForResult(getImageByCamera, 1);      //使用startActivityForReaule 方法
 								
-								
-								 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-								startActivityForResult(intent,
-										PIC_REQUEST_CODE_SELECT_CAMERA);
 							}
 						})
 				.setNegativeButton("手机相册",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
-								Intent intent = new Intent();
+								/*Intent intent = new Intent();
 								intent.setType("image/*");
-								intent.setAction(Intent.ACTION_GET_CONTENT);
-								startActivityForResult(intent, PIC_Select_CODE_ImageFromLoacal);
+								intent.setAction(Intent.ACTION_GET_CONTENT);*/
+								Intent intent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+								
+								
+								startActivityForResult(intent, 2);
 							}
 						}).show();
 	
 			}
 		});
-           
-           
-           
-           
-		 }	
-	// 使用数组形式操作
+  
+}	
+	
+	 
+	 /*
+	  * 使用数组形式操作 spinner
+	  */
 	class SpinnerSelectedListener implements OnItemSelectedListener {
 
 		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
@@ -147,51 +203,160 @@ public class Main extends Activity {
 		 }
 
 	}
-		
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-		if (resultCode == RESULT_OK) {
-			switch (requestCode) {
-
-			// 调用Gallery返回的
-			case PIC_REQUEST_CODE_WITH_DATA: {
-				final Bitmap photo = data.getParcelableExtra("data");
-				
-
-				break;
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		 if (requestCode == 1)   //调用系统相机
+			{
+				try
+				{
+					today = new Date();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmm");
+					fileName = sdf.format(today);  
+					super.onActivityResult(requestCode, resultCode, data);	                
+	                InputStream is=  this.getContentResolver().openInputStream(imageFilePath);
+	                  image_Content=readStream(is);
+	                  myBitmap = getPicFromBytes(image_Content, null);
+	                
+	                  image_show.setImageBitmap(myBitmap);  // 预览功能
+					
+	                  BufferedOutputStream bos = new BufferedOutputStream(
+							new FileOutputStream(String.format(
+									"sdcard/Pic/upLoad/" + fileName + ".jpg",
+									System.currentTimeMillis())));
+					 photo_file = new File("sdcard/Pic/upLoad/" + fileName + ".jpg");
+				     myBitmap.compress(Bitmap.CompressFormat.JPEG, 60, bos);  
+					bos.flush();
+					bos.close();						
+				} catch ( Exception e )
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			// 照相机程序返回的,再次调用图片剪辑程序去修剪图片
-			case PIC_REQUEST_CODE_SELECT_CAMERA: {
-				try {
+		
+	     if(requestCode == 2){    //选择照片
+	    	 Uri selectedImage = data.getData();
+	    	 String[] filePathColumn = { MediaStore.Images.Media.DATA };
+	    	 Cursor cursor = getContentResolver().query(selectedImage,filePathColumn, null, null, null);
+	    	 cursor.moveToFirst();
+             int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+	    	 String picturePath = cursor.getString(columnIndex);
+	    	 cursor.close();    	 
+	    	 image_show.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+	    	 
+              photo_file = new File(picturePath);   // 文件地址···
+	    	 
+	     }
+	
+	
+	}
+	
+	//读取图片
+			public static byte[] readStream ( InputStream inStream ) throws Exception
+			{
+				byte[] buffer = new byte[1024];
+				int len = -1;
+				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+				while ((len = inStream.read(buffer)) != -1)
+				{
+					outStream.write(buffer, 0, len);
+				}
+				byte[] data = outStream.toByteArray();
+				outStream.close();
+				inStream.close();
+				return data;
 
-					try {
-						IntentFilter intentFilter = new IntentFilter(
-								Intent.ACTION_MEDIA_SCANNER_STARTED);
-						intentFilter
-								.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
-						intentFilter.addDataScheme("file");
-						intentFilter
-								.addAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-					} catch (RuntimeException e) {
-
+			}
+	
+			//转换成bitmap
+			public static Bitmap getPicFromBytes ( byte[] bytes , BitmapFactory.Options opts )
+			{
+				if (bytes != null)
+					if (opts != null)
+						return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opts);
+					else
+						return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+				
+				return null;
+				
+			}
+	
+	
+	
+	
+			 // 网络访问线程
+			private class PostAdTask extends AsyncTask<URL, Integer, String> {
+				    
+					
+					@Override
+					protected void onPreExecute() {
+						// TODO Auto-generated method stub
+						Log.e("M2", "begin");
+						super.onPreExecute();
 					}
 
-				} catch (Exception e) {
-					Toast.makeText(this, "获取图片异常，请重新尝试", Toast.LENGTH_LONG)
-							.show();
-					
-				}
-				break;
-			}
-			case PIC_Select_CODE_ImageFromLoacal:
-				
-	
-				
-				break;
-			}
-		}
-	}
+					protected String doInBackground(URL... urls) {
+						Log.e("M22", "begin");
+			         
+			             
+					     String status = null ; // 是否提交成功
+							
+							 Map<String, String> addForm = new HashMap<String, String>();
+							 
+							 
+							           addForm.put("title", title);
+							           addForm.put("contentShort", contentShort);
+							           addForm.put("content", content);
+							           addForm.put("promotion", promotion);
+							           addForm.put("pricePro", pricePro);
+							           addForm.put("price", price);
+							  Map <String,File> photo_f = new HashMap <String,File>();
+							                photo_f.put("photo_file", photo_file);
+							           
+							  
+							try {
+								
+								 status = NetUtil.postFile(urls[0].toString(), addForm, photo_f);
+								
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+			              
+			          
+			            
+			            
+				         return status;
+				     }
 
-}
+				
+					 @Override
+						protected void onProgressUpdate(Integer... values) {
+							// TODO Auto-generated method stub
+							super.onProgressUpdate(values);
+							
+						}
+
+						protected void onPostExecute(String result) {
+							Log.e("M222", "begin");
+					     
+						     add_statues = result;
+						}
+				
+			}
+
+	}
+	
+	
+	
+
+	
+	
+	
+	
+	
 
