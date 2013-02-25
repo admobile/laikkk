@@ -16,5 +16,6 @@
     <string name="adprice">原价格</string>
     <string name="adpic">广告图片</string>
     <string name="submit">提交</string>
-     <string name="loading">载入 </string>
+    <string name="loading">载入 </string>
+    <string name="ad_content">输入或长按选择模板</string>
 </resources>

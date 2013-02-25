@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,33 +15,23 @@ import com.lkk.mobile.tools.NetUtil;
 
 
 
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Picture;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -55,7 +44,7 @@ import android.widget.Toast;
 
 public class Main extends Activity {
 	
-	private static final String[] m={"促销","不促销"};   //spinner 填充数据
+	private static final String[] m={"不促销","促销"};   //spinner 填充数据
 	 private ArrayAdapter<String> adapter;
 	//控件
 	 EditText e_title ;
@@ -67,7 +56,7 @@ public class Main extends Activity {
 	 Button   b_file ;
 	 Button  submit;
 	 ImageView image_show;
-	 
+	
 	 //变量
 	 String title ;
 	 String contentShort ; 	
@@ -95,10 +84,12 @@ public class Main extends Activity {
 		 e_content = (EditText)findViewById(R.id.textView3_2_content);   //广告内容
 		 s_promotion = (Spinner)findViewById(R.id.spiView4_2_promotion);   // 是否促销  0 促销  1 不促销
 		 e_pricePro = (EditText)findViewById(R.id.textView5_2_pricePro);  //促销价格
+		 e_pricePro.setVisibility(View.INVISIBLE);      //默认不可见	
 		 e_price = (EditText)findViewById(R.id.textView6_2_price);       //原价格
 		 b_file =  (Button)findViewById(R.id.button_file);               // 上传图片
-	     submit = (Button) findViewById(R.id.buttom_submit);
+	     submit = (Button) findViewById(R.id.buttom_submit);            //提交
 		 image_show = (ImageView) findViewById(R.id.Pic_show);
+		
 	  
 		 //处理spinner
 		adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,m);
@@ -107,7 +98,28 @@ public class Main extends Activity {
         s_promotion.setOnItemSelectedListener(new SpinnerSelectedListener());
 		s_promotion.setVisibility(View.VISIBLE);
 		 
-		    
+		    e_content.setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+					// TODO Auto-generated method stub
+					
+					final String form[]={ "模板一", "模板二","模板三" };
+					new AlertDialog.Builder(Main.this).setTitle("选择广告模板").setItems(form, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							e_content.setText(form[which].toString());
+							
+						}
+					}).show();
+
+					return true;
+				}
+				
+	
+			});
 		 
 		 
            submit.setOnClickListener(new OnClickListener() {
@@ -120,8 +132,18 @@ public class Main extends Activity {
 			    content = e_content.getText().toString();
 			    pricePro = e_pricePro.getText().toString();
 			    price = e_price.getText().toString();
-			   
 			   // Log.e("ADD", title+content+content+price+pricePro+photo_file.toString());
+			    //
+			    if(title.equals("")){
+			      Toast.makeText(Main.this, "没有写标题",Toast.LENGTH_SHORT ).show();
+			      e_title.setFocusable(true);
+			      e_title.setFocusableInTouchMode(true);
+			      e_title.requestFocus();
+			      e_title.requestFocusFromTouch();
+			    }
+			    
+			    	
+			   
 			       //还差一个图片路径
 			    //多线程 提交广告
 				/* URL url = null;
@@ -134,6 +156,35 @@ public class Main extends Activity {
 					 new PostAdTask().execute(url);    //启动线程
 				      */
 				
+			     //创建提示
+			    
+			    new AlertDialog.Builder(Main.this).setTitle("发布广告结果")
+			     .setMessage(add_statues)
+				.setPositiveButton("确定",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								
+								
+							}
+						})
+				.setNegativeButton("继续录入",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								 e_title.setText("");     
+								 e_contentShort.setText("");
+								 e_content.setText("");      
+								 e_price.setText("");     
+	                              //设置焦点
+								 e_title.setFocusable(true);
+							     e_title.setFocusableInTouchMode(true);
+							     e_title.requestFocus();
+							     e_title.requestFocusFromTouch();
+								
+							}
+						}).show();
+			    
 			}
 		});
            
@@ -157,6 +208,7 @@ public class Main extends Activity {
 								imageFilePath = Main.this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 								Log.e("imagePath",imageFilePath.toString());
 								getImageByCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageFilePath); //这样就将文件的存储方式和uri指定到了Camera应用中 
+								
 								//修改这个地址
 								Log.e("Start1", "start1`````````````");
 								startActivityForResult(getImageByCamera, 1);      //使用startActivityForReaule 方法
@@ -190,12 +242,13 @@ public class Main extends Activity {
 
 		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
            promotion = m[arg2];   //促销
-          /* if(m[arg2].equals("促销")){
-        	   promotion = "0";
-           } else {
-        	   promotion = "1";
+         if(m[arg2].equals("促销")){
+        	  // promotion = "0";
+        	 e_pricePro.setVisibility(View.VISIBLE);
+           } else{      //no promot
+        	   e_pricePro.setVisibility(View.INVISIBLE);
            }
-           */
+           
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
@@ -227,7 +280,8 @@ public class Main extends Activity {
 							new FileOutputStream(String.format(
 									"sdcard/Pic/upLoad/" + fileName + ".jpg",
 									System.currentTimeMillis())));
-					 photo_file = new File("sdcard/Pic/upLoad/" + fileName + ".jpg");
+	                  
+					 photo_file = new File("sdcard/Pic/upLoad/" + fileName + ".jpg");  //上传的文件路径
 				     myBitmap.compress(Bitmap.CompressFormat.JPEG, 60, bos);  
 					bos.flush();
 					bos.close();						
