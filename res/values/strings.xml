@@ -11,6 +11,7 @@
     <string name="adtitle">广告标题</string>
     <string name="addesc">广告简介</string>
     <string name="adbody">广告内容</string>
+    <string name="adbodypic">内容图片</string>
     <string name="adpromote">是否促销</string>
     <string name="adpromoteprice">促销价格</string>
     <string name="adprice">原价格</string>

@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -26,13 +27,15 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 public class NetUtil {
-	
+	private static final String CHARSET = "UTF-8"; // 设置编码
 	
     public static String checkUser(String urlPath, String username,String Password){
     	
@@ -94,11 +97,21 @@ public class NetUtil {
 			client.getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 29000);
 			HttpResponse httpResponse = client.execute(httpRequest);			
 			if (httpResponse.getStatusLine().getStatusCode() == 200) {
-				strResult = EntityUtils.toString(httpResponse.getEntity());
-				return strResult;
+				HttpEntity entity = httpResponse.getEntity();
+				if (entity != null) {
+					String out = EntityUtils.toString(entity, CHARSET);
+					try {
+						JSONObject jsonObject = new JSONObject(out);
+						strResult = jsonObject.getString("msg");
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
 			} else {
-
+				strResult = "网络故障";
 			}
+			
+			
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {

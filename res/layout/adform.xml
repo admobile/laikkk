@@ -97,6 +97,63 @@
             android:layout_marginRight="10dip"
             />     
     </TableRow>     
+    <TableRow    
+        android:id="@+id/tableRow3_1"    
+        android:layout_height="wrap_content"    
+        android:layout_width="match_parent"    
+        android:gravity="center_horizontal">    
+        <TextView    
+            android:id="@+id/textView3_1"    
+            android:layout_width="match_parent"    
+            android:layout_height="wrap_content"    
+            android:textStyle="bold"    
+            android:typeface="serif"    
+            android:textSize="18sp"    
+            android:text="@string/adbodypic"
+            android:gravity="right"    
+            android:layout_span="4"></TextView>   
+             <Button 
+            android:id="@+id/content_pic"    
+            android:layout_width="match_parent"    
+            android:layout_height="wrap_content"    
+            android:textStyle="bold"    
+            android:typeface="serif"    
+            android:textSize="18sp"    
+            android:text="@string/adbodypic"
+            android:gravity="center"    
+            android:layout_span="8"
+            android:layout_marginRight="10dip"
+          
+          />        
+    </TableRow>
+     <TableRow    
+        android:id="@+id/tableRow3_1_1"    
+        android:layout_height="wrap_content"    
+        android:layout_width="match_parent"    
+        android:gravity="center_horizontal">    
+        <TextView    
+            android:id="@+id/textView3_1_1"    
+            android:layout_width="match_parent"    
+            android:layout_height="wrap_content"    
+            android:textStyle="bold"    
+            android:typeface="serif"    
+            android:textSize="18sp"
+            android:text="图片预览"    
+            android:gravity="right"    
+            android:layout_span="4"></TextView>    
+      <ImageView
+           android:id="@+id/contentPic_show"    
+            android:layout_width="match_parent"    
+            android:layout_height="50dip"    
+            android:textStyle="bold"    
+            android:typeface="serif"    
+            android:textSize="18sp" 
+            android:gravity="left"    
+            android:layout_span="8"
+          
+          
+          />    
+      </TableRow> 
 <TableRow    
         android:id="@+id/tableRow3"    
         android:layout_height="wrap_content"    

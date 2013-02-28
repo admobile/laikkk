@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.w3c.dom.ls.LSInput;
+
 
 import com.lkk.mobile.tools.NetUtil;
 
@@ -15,8 +17,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,11 +29,13 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import android.widget.Toast;
 
@@ -58,21 +64,26 @@ public class LaikkLogin extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 		       
+				username = username_View.getText().toString();   
+				password = password_View.getText().toString();
+				
 				//多线程访问 网络	
-			/*	 URL url = null;
+				 URL url = null;
 				try {
-					url = new URL("");
+					url = new URL("http://www.laikankan.cn/AdInput!checkUsr");
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}  //网络URL
-				 new checkUserTask().execute(url);    //启动线程
-				*/        
-				username = username_View.getText().toString();   
-				password = password_View.getText().toString();
+				 new checkUserTask().execute(url);    //启动线程    
+				
 				Log.e(username, password);
-				if(username.equals("admin")&& password.equals("admin")){
-					Intent intent = new Intent();  
+				
+				//if(username.equals("admin")&& password.equals("admin")){
+				
+				
+				 if("ok".equals(user_state)){
+				    Intent intent = new Intent();  
                     //验证通过，启动下一个acticity
                     intent.setClass(LaikkLogin.this, Main.class);  
                     //启动Activity  
@@ -114,10 +125,12 @@ public class LaikkLogin extends Activity {
 		 * 如果没有创建的话就重新在sdcard里创建fatalityUpload文件夹
 		 */
 		if (existSDcard()) { // 判断手机SD卡是否存在
-			if (new File("/sdcard").canRead()) {
-				File file = new File("sdcard/Pic/upLoad/");
+			File sdcardDir =Environment.getExternalStorageDirectory();
+			if (new File(sdcardDir.getPath()).canRead()) {
+				 
+				File file = new File(sdcardDir.getPath()+"/Pic/upLoad/");
 				if (!file.exists()) {
-					file.mkdir();
+					file.mkdirs();
 				}
 			}
 		} else {
@@ -184,31 +197,59 @@ public class LaikkLogin extends Activity {
 		}
 		return result;
 	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	if(keyCode==KeyEvent.KEYCODE_BACK&&event.getRepeatCount()==0){
+	            AlertDialog.Builder alertbBuilder=new AlertDialog.Builder(this);
+	            alertbBuilder.setTitle("真的要离开？").setMessage("你确定要离开？").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+	                    
+	                    @Override
+	                    public void onClick(DialogInterface dialog, int which) {
+	                            //结束这个Activity
+	                    	int nPid = android.os.Process.myPid();
+	                    	android.os.Process.killProcess(nPid);
+	                    }
+	            }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+	                    
+	                    @Override
+	                    public void onClick(DialogInterface dialog, int which) {
+	                            dialog.cancel();
+	                            
+	                    }
+	            }).create();
+	            alertbBuilder.show();
+	            
+	    }
+	return true;
+	}
     
    // 网络访问线程
 private class checkUserTask extends AsyncTask<URL, Integer, String> {
-	    
+	
+	ProgressDialog progerDialog;
 		
 		@Override
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
 			Log.e("M2", "begin");
 			super.onPreExecute();
+			progerDialog = ProgressDialog.show(LaikkLogin.this, "登陆中", "请稍后···");
 		}
 
 		protected String doInBackground(URL... urls) {
 			Log.e("M22", "begin");
          
-             
-		
+		    
 				
 				 Map<String, String> checkUser = new HashMap<String, String>();
 				           checkUser.put("username", username);
 				           checkUser.put("password", password);
+				          Log.e(username, password);
 				   String status = NetUtil.getStringByPost(urls[0].toString(), checkUser);
               
           
-            
+            Log.e("userStatus", status);
             
 	         return status;
 	     }
@@ -223,8 +264,11 @@ private class checkUserTask extends AsyncTask<URL, Integer, String> {
 
 			protected void onPostExecute(String result) {
 				Log.e("M222", "begin");
-		     
+				progerDialog.dismiss();
 			     user_state = result;
+			     Log.e("us", user_state);
+			     
+			     
 			}
 	
 }
