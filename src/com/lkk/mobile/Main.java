@@ -607,4 +607,10 @@ public class Main extends Activity {
 						}).show();
 	}
 
+	public void test(){
+		
+		// test GIT
+	}
+	
+	
 }
