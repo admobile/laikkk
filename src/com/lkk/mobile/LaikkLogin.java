@@ -121,14 +121,14 @@ public class LaikkLogin extends Activity {
 	 */
 	public void checkPhoneStage() {
 		/*
-		 * 先看手机是否已插入sd卡 然后判断sd卡里是不是已经创建了fatalityUpload文件夹用来存储本程序拍下来的照片
-		 * 如果没有创建的话就重新在sdcard里创建fatalityUpload文件夹
+		 * 先看手机是否已插入sd卡 然后判断sd卡里是不是已经创建了文件夹用来存储本程序拍下来的照片
+		 * 如果没有创建的话就重新在sdcard里创建文件夹
 		 */
 		if (existSDcard()) { // 判断手机SD卡是否存在
 			File sdcardDir =Environment.getExternalStorageDirectory();
 			if (new File(sdcardDir.getPath()).canRead()) {
 				 
-				File file = new File(sdcardDir.getPath()+"/Pic/upLoad/");
+				File file = new File(sdcardDir.getPath()+"PicLaikk/upLoadPic/");
 				if (!file.exists()) {
 					file.mkdirs();
 				}
