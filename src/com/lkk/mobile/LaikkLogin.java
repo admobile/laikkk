@@ -56,7 +56,7 @@ public class LaikkLogin extends Activity {
 		  password_View =(EditText)findViewById(R.id.password);
 		  submit_button =(Button)findViewById(R.id.submit);
 		
-		  
+		  //aaaaaaa
 			
 		  submit_button.setOnClickListener(new OnClickListener() {
 			
